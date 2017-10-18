@@ -1,18 +1,39 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
+import * as cfg from 'config';
 
 export default class homeScreen extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
-    this.state = {}
+    this.state = {
+      trafficImages: [],
+      title: 'Traffic Camera app will update you real time'
+    }
+
+    this.getTrafficCameras = this.getTrafficCameras.bind(this);
+  }
+
+  getTrafficCameras () {
+    fetch(cfg.apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    }).then(response => response.json()).then(res => {
+      const { navigate } = this.props.navigation;
+      if(res.length > 0) navigate('Camera', { trafficImages: res })
+    }).catch(e => {
+      console.log('error',e);
+    });
   }
 
   static navigationOptions = {
     title: 'Home',
   };
+
   render() {
-    const { navigate } = this.props.navigation;
     return (
       <View style={styles.container}>
         <Text style={styles.white}>Traffic Camera app will update you real time </Text>
@@ -20,13 +41,14 @@ export default class homeScreen extends React.Component {
         <Button
           title="Go to Camera View"
           onPress={() =>
-            navigate('Camera', { name: 'Jane' })
+            this.getTrafficCameras()
           }
         />
       </View>
     );
   }
 }
+
 
 const styles = StyleSheet.create({
   container: {
